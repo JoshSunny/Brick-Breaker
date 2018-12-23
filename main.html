@@ -1,0 +1,159 @@
+<!doctype html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>brick breaker</title>
+	<style media="screen">
+		canvas{	border: 3px yellowgreen solid ;	}
+	</style>
+</head>
+
+<body>
+<h2>Press "Arrowleft"and "Aroowright" to move the paddle ,and "Arrowup" to shot the ball.</h2>
+<canvas id="idcan" width="800" height="600"></canvas>
+<script> 
+	alert('I am so sorry, C.\nI lacked enough time and necessary skills ,persistence to finish the task, consequently having to submit this terrible ball and ugly paddle with even no bricks.')
+
+	var log = console.log.bind(console)
+	var canvas = document.querySelector("#idcan")
+	
+	var Game=function(){
+		var g={	actions:{},	keydowns:{},}
+		//CANVAS
+		g.canvas=canvas
+		g.ctx=canvas.getContext("2d")
+		//DRAW
+		g.drawImage=function(gImage){
+			g.ctx.drawImage(gImage.image,gImage.x,gImage.y)
+		}
+		//EVENT
+		window.addEventListener("keydown",function(event){	g.keydowns[event.keyCode]=true	})
+		window.addEventListener("keyup",function(event){	g.keydowns[event.keyCode]=false	})
+		
+		g.registerActions=function(keyCode,feedback){	g.actions[keyCode]=feedback	}
+		
+		setInterval(function(){
+			// EVENTS
+			var set = Object.keys(g.actions)
+        	for (var i = 0; i < set.length; i++) {
+            	var key = set[i]
+            	if(g.keydowns[key]) {
+                     g.actions[key]()
+            }
+        }
+			//REDRAW			
+			g.update()
+			g.ctx.clearRect(0,0,canvas.width,canvas.height)
+			g.draw()
+		},1000/30)
+		return g
+}
+	
+	
+	var imageFromPath=function(path){
+		var img=new Image()
+		img.src=path
+		return img
+	}
+	
+	var Paddle = function(){
+		var img=imageFromPath("paddle.png")
+		var o={
+			image:img,
+		    x:100,
+		    y:300,
+		    speed:15,
+		}
+		o.moveLeft=function(){
+			if(o.x-o.speed>=0)
+					o.x-=o.speed
+			else
+					o.x=0
+		}
+		o.moveRight=function(){
+			if(o.x+o.speed+img.width<=canvas.width)
+					o.x+=o.speed
+			else
+					o.x=canvas.width-img.width
+		}
+		o.collide = function(ball) {
+        //if (ball.y + ball.image.height > o.y) 
+            if (ball.x > o.x && ball.x < o.x + img.width) {
+                log('collide')
+                return true
+            }
+           return false
+		}
+      	   return o
+	    }
+	var Ball = function(){
+		var img=imageFromPath("ball.png")
+		var o={
+			image:img,
+		    x:100,
+		    y:300,
+		    speedx:-10,
+			speedy:-10,
+			fired:false,
+		}
+	 o.fire = function() {
+        o.fired = true
+    }
+     o.move = function() {
+		 log("move")
+        if (o.fired) {
+            if (o.x < 0 || o.x + img.width> canvas.width) {
+                o.speedx *=(-1)
+            }
+            if (o.y < 0 || o.y +img.height>canvas.height) {
+                o.speedy *=(-1)
+            }
+           
+            o.x += o.speedx
+            o.y += o.speedy
+        }
+    }
+		return o
+	}
+	
+	
+/*	function Paddle{
+		this.image=imageFromPath(("paddle.png")
+		this.x=400
+		this.y=300
+		this.speed=5
+	}
+	why is it invaild??  */
+	
+	var __main=function(){
+			// GUI		
+		var game=Game()
+		var paddle = Paddle()
+		var ball=Ball()
+	//	window.addEventListener("keydown",function(event){log(event)})
+	// debug
+		
+//		var leftd=false,rightd=false
+		
+			// EVENT
+		game.registerActions(37,function(){paddle.moveLeft()})  //37 is the keycode of ArrowLeft
+		game.registerActions(39,function(){paddle.moveRight()}) //39 is the keycode of ArrowRight
+		game.registerActions(38, function(){ball.fire()}) //38 is the keycode of ArrowUp
+		
+		game.update=function(){
+			ball.move()
+			if (paddle.collide(ball)) 
+                  ball.speedy *= -1
+		}
+		
+		game.draw=function(){
+			game.drawImage(paddle)
+			game.drawImage(ball)
+		}
+}		
+		
+	__main()
+
+</script>
+</body>
+</html>
